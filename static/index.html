@@ -152,6 +152,39 @@
     </div>
   </div>
 
+  <!-- Not Interested Modal -->
+  <div id="dismiss-overlay" class="modal-overlay">
+    <div class="modal dismiss-modal">
+      <div class="modal-header">
+        <h3>Why are you not interested?</h3>
+        <button class="modal-close" id="dismiss-close">&times;</button>
+      </div>
+      <div class="dismiss-body">
+        <button class="dismiss-option" data-reason="unavailable">
+          <span class="dismiss-icon">&#128683;</span>
+          <div>
+            <strong>Job posting is no longer available</strong>
+            <p>This role will be permanently hidden from future searches.</p>
+          </div>
+        </button>
+        <button class="dismiss-option" data-reason="not-interested">
+          <span class="dismiss-icon">&#128528;</span>
+          <div>
+            <strong>I'm just not interested</strong>
+            <p>This role will be removed from the current results.</p>
+          </div>
+        </button>
+        <button class="dismiss-option" data-reason="rejected">
+          <span class="dismiss-icon">&#128532;</span>
+          <div>
+            <strong>I applied and got rejected</strong>
+            <p>This role will be permanently hidden from future searches.</p>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- PDF Viewer Modal -->
   <div id="pdf-overlay" class="modal-overlay">
     <div class="modal pdf-viewer-modal">

@@ -56,6 +56,9 @@ function applyFilters(jobs) {
   let filtered = jobs.filter((job, idx) => {
     // Exclude dismissed
     if (dismissedJobs.has(idx)) return false;
+    // Exclude permanently blocked
+    const blockKey = `${job.company}|||${job.position}`.toLowerCase();
+    if (blockedJobKeys.has(blockKey)) return false;
     // Format filter
     if (f.format !== 'all' && job.format !== f.format) return false;
     // Min pay filter
@@ -92,6 +95,7 @@ searchBtn.addEventListener('click', async () => {
   resultsContainer.hidden = true;
 
   try {
+    await loadBlockedJobs();
     const res = await fetch('/api/jobs/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -166,16 +170,8 @@ function renderJobTable(jobs, source) {
   document.querySelectorAll('.btn-not-interested').forEach(btn => {
     btn.addEventListener('click', () => {
       const origIdx = parseInt(btn.dataset.origIdx);
-      dismissedJobs.add(origIdx);
-      // Animate row out
-      const row = btn.closest('tr');
-      row.style.transition = 'opacity 0.3s, transform 0.3s';
-      row.style.opacity = '0';
-      row.style.transform = 'translateX(20px)';
-      setTimeout(() => {
-        currentJobs = applyFilters(allJobs);
-        renderJobTable(currentJobs, lastSource);
-      }, 300);
+      const job = allJobs[origIdx];
+      openDismissModal(origIdx, job, btn.closest('tr'));
     });
   });
 }
@@ -437,6 +433,78 @@ pdfClose.addEventListener('click', closePdfViewer);
 pdfOverlay.addEventListener('click', e => {
   if (e.target === pdfOverlay) closePdfViewer();
 });
+
+// ── Dismiss (Not Interested) Modal ──
+const dismissOverlay = document.getElementById('dismiss-overlay');
+const dismissClose = document.getElementById('dismiss-close');
+let pendingDismiss = null;
+
+function openDismissModal(origIdx, job, rowEl) {
+  pendingDismiss = { origIdx, job, rowEl };
+  dismissOverlay.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDismissModal() {
+  dismissOverlay.classList.remove('visible');
+  document.body.style.overflow = '';
+  pendingDismiss = null;
+}
+
+dismissClose.addEventListener('click', closeDismissModal);
+dismissOverlay.addEventListener('click', e => {
+  if (e.target === dismissOverlay) closeDismissModal();
+});
+
+document.querySelectorAll('.dismiss-option').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    if (!pendingDismiss) return;
+    const reason = btn.dataset.reason;
+    const { origIdx, job, rowEl } = pendingDismiss;
+
+    // Always dismiss from current view
+    dismissedJobs.add(origIdx);
+
+    // If unavailable or rejected, permanently block
+    if (reason === 'unavailable' || reason === 'rejected') {
+      const blockKey = `${job.company}|||${job.position}`.toLowerCase();
+      await fetch('/api/blocked-jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: blockKey,
+          company: job.company,
+          position: job.position,
+          reason: reason,
+        })
+      });
+    }
+
+    closeDismissModal();
+
+    // Animate row out
+    rowEl.style.transition = 'opacity 0.3s, transform 0.3s';
+    rowEl.style.opacity = '0';
+    rowEl.style.transform = 'translateX(20px)';
+    setTimeout(() => {
+      currentJobs = applyFilters(allJobs);
+      renderJobTable(currentJobs, lastSource);
+    }, 300);
+  });
+});
+
+// ── Blocked Jobs Filtering ──
+let blockedJobKeys = new Set();
+
+async function loadBlockedJobs() {
+  try {
+    const res = await fetch('/api/blocked-jobs');
+    const data = await res.json();
+    blockedJobKeys = new Set((data.blocked || []).map(b => b.key));
+  } catch (err) {
+    // ignore
+  }
+}
 
 // ── Utility ──
 function esc(str) {

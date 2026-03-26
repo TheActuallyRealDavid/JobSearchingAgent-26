@@ -750,6 +750,57 @@ body {
   line-height: 1.6;
 }
 
+/* ── Dismiss Modal ── */
+.dismiss-modal {
+  max-width: 460px;
+}
+
+.dismiss-body {
+  padding: 8px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dismiss-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: all var(--transition);
+}
+
+.dismiss-option:hover {
+  border-color: var(--primary-subtle);
+  background: var(--primary-light);
+}
+
+.dismiss-option .dismiss-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.dismiss-option strong {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--gray-900);
+  margin-bottom: 2px;
+}
+
+.dismiss-option p {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+  margin: 0;
+  line-height: 1.4;
+}
+
 /* ── PDF Viewer Modal ── */
 .pdf-viewer-modal {
   max-width: 850px;

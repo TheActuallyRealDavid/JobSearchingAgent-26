@@ -17,6 +17,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RESUMES_DIR = os.path.join(BASE_DIR, "resumes")
 DATA_FILE = os.path.join(BASE_DIR, "resume_data.json")
 SETTINGS_FILE = os.path.join(BASE_DIR, "settings.json")
+BLOCKED_FILE = os.path.join(BASE_DIR, "blocked_jobs.json")
 
 # Try importing pdfplumber for text extraction
 try:
@@ -72,6 +73,18 @@ def load_settings():
 def save_settings(settings):
     with open(SETTINGS_FILE, "w") as f:
         json.dump(settings, f, indent=2)
+
+# ── Blocked jobs helpers ──
+
+def load_blocked():
+    if os.path.exists(BLOCKED_FILE):
+        with open(BLOCKED_FILE, "r") as f:
+            return json.load(f)
+    return {"blocked": []}
+
+def save_blocked(data):
+    with open(BLOCKED_FILE, "w") as f:
+        json.dump(data, f, indent=2)
 
 # ── JSearch API ──
 
@@ -248,7 +261,8 @@ SAMPLE_JOBS = [
         "format": "On-site",
         "pay_range": "$47-52/hr",
         "is_reach": False,
-        "description": "Design, develop, and test software for fulfillment center robotics, material handling, computer vision, and cloud services. Work with Python, Java, and C++ on production systems at scale."
+        "description": "Design, develop, and test software for fulfillment center robotics, material handling, computer vision, and cloud services. Work with Python, Java, and C++ on production systems at scale.",
+        "apply_link": "https://www.amazon.jobs/en/teams/internships-for-students"
     },
     {
         "company": "OpenAI",
@@ -297,7 +311,8 @@ SAMPLE_JOBS = [
         "format": "On-site",
         "pay_range": "$40-55/hr",
         "is_reach": False,
-        "description": "Work on GPU-accelerated computing and high-performance software. Strong C/C++ programming skills required. Experience with systems programming, parallel computing, or graphics is a plus."
+        "description": "Work on GPU-accelerated computing and high-performance software. Strong C/C++ programming skills required. Experience with systems programming, parallel computing, or graphics is a plus.",
+        "apply_link": "https://www.nvidia.com/en-us/about-nvidia/careers/university-recruiting/"
     },
     {
         "company": "Qualcomm",
@@ -306,7 +321,8 @@ SAMPLE_JOBS = [
         "format": "On-site",
         "pay_range": "$30-45/hr",
         "is_reach": False,
-        "description": "Develop embedded and application-level software for mobile and IoT platforms. Requires proficiency in C/C++, Python, or Java. Graduation between Nov 2026 and Jun 2027."
+        "description": "Develop embedded and application-level software for mobile and IoT platforms. Requires proficiency in C/C++, Python, or Java. Graduation between Nov 2026 and Jun 2027.",
+        "apply_link": "https://careers.qualcomm.com/careers/internships"
     },
     {
         "company": "JPMorgan Chase",
@@ -315,7 +331,8 @@ SAMPLE_JOBS = [
         "format": "Hybrid",
         "pay_range": "$38-45/hr",
         "is_reach": False,
-        "description": "Build and optimize digital applications and systems supporting millions of customers. Work with Java, Python, React, Node.js, and cloud platforms in an agile team environment."
+        "description": "Build and optimize digital applications and systems supporting millions of customers. Work with Java, Python, React, Node.js, and cloud platforms in an agile team environment.",
+        "apply_link": "https://careers.jpmorgan.com/us/en/students/programs/software-engineer-summer"
     },
     {
         "company": "Boeing",
@@ -324,7 +341,8 @@ SAMPLE_JOBS = [
         "format": "On-site",
         "pay_range": "$25-38/hr",
         "is_reach": False,
-        "description": "12-week program developing software for aerospace systems. Experience with C/C++, Java, or Python. Work on real projects with business impact in avionics, simulation, or data systems."
+        "description": "12-week program developing software for aerospace systems. Experience with C/C++, Java, or Python. Work on real projects with business impact in avionics, simulation, or data systems.",
+        "apply_link": "https://jobs.boeing.com/entry-level"
     },
     {
         "company": "Lockheed Martin",
@@ -333,7 +351,8 @@ SAMPLE_JOBS = [
         "format": "On-site",
         "pay_range": "$22-35/hr",
         "is_reach": False,
-        "description": "Develop software for defense and aerospace systems. Strong C/C++ and systems programming skills valued. Must be eligible for security clearance (US citizenship required)."
+        "description": "Develop software for defense and aerospace systems. Strong C/C++ and systems programming skills valued. Must be eligible for security clearance (US citizenship required).",
+        "apply_link": "https://www.lockheedmartinjobs.com/college-students"
     },
 ]
 
@@ -605,6 +624,12 @@ class Handler(BaseHTTPRequestHandler):
             self.json_response({"has_key": bool(key), "masked_key": masked})
             return
 
+        # Get blocked jobs
+        if path == "/api/blocked-jobs":
+            data = load_blocked()
+            self.json_response(data)
+            return
+
         # List resumes
         if path == "/api/resumes":
             data = load_data()
@@ -700,6 +725,24 @@ class Handler(BaseHTTPRequestHandler):
             if "rapidapi_key" in payload:
                 settings["rapidapi_key"] = payload["rapidapi_key"].strip()
             save_settings(settings)
+            self.json_response({"success": True})
+            return
+
+        # Block a job
+        if path == "/api/blocked-jobs":
+            payload = json.loads(body)
+            data = load_blocked()
+            # Avoid duplicates
+            existing_keys = {b["key"] for b in data["blocked"]}
+            if payload.get("key") not in existing_keys:
+                data["blocked"].append({
+                    "key": payload["key"],
+                    "company": payload.get("company", ""),
+                    "position": payload.get("position", ""),
+                    "reason": payload.get("reason", ""),
+                    "date": datetime.now().isoformat(),
+                })
+                save_blocked(data)
             self.json_response({"success": True})
             return
 

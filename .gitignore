@@ -6,6 +6,9 @@ settings.json
 resumes/
 resume_data.json
 
+# Blocked jobs (user data)
+blocked_jobs.json
+
 # Python
 __pycache__/
 *.pyc
