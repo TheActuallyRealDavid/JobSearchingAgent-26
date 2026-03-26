@@ -1,0 +1,11 @@
+# Sensitive files
+settings.json
+.DS_Store
+
+# Uploaded resumes (user data)
+resumes/
+resume_data.json
+
+# Python
+__pycache__/
+*.pyc

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Search Agent</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+  <nav class="top-nav">
+    <div class="nav-brand">Job Search Agent</div>
+    <div class="nav-links">
+      <a href="#" class="nav-link active" data-screen="job-search">Job Search</a>
+      <a href="#" class="nav-link" data-screen="resume-manager">Resume Manager</a>
+      <a href="#" class="nav-link" data-screen="settings">Settings</a>
+    </div>
+  </nav>
+
+  <!-- Job Search Screen -->
+  <main id="job-search" class="screen active">
+    <div class="search-section">
+      <h2>Find Fall/Winter 2026 Internships</h2>
+      <p class="subtitle">Searching for hybrid and on-site roles at large, established companies in the US.</p>
+      <button id="filter-toggle" class="btn btn-secondary">Filters</button>
+      <button id="search-btn" class="btn btn-primary btn-large">Search Jobs</button>
+    </div>
+
+    <!-- Filters Panel -->
+    <div id="filters-panel" class="filters-panel" hidden>
+      <div class="filter-group">
+        <label for="filter-count">Max results</label>
+        <select id="filter-count">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-min-pay">Min pay ($/hr)</label>
+        <input type="number" id="filter-min-pay" placeholder="e.g. 20" min="0" value="">
+      </div>
+      <div class="filter-group">
+        <label for="filter-max-pay">Max pay ($/hr)</label>
+        <input type="number" id="filter-max-pay" placeholder="e.g. 60" min="0" value="">
+      </div>
+      <div class="filter-group">
+        <label for="filter-format">Work format</label>
+        <select id="filter-format">
+          <option value="all">All (Hybrid + On-site)</option>
+          <option value="On-site">On-site only</option>
+          <option value="Hybrid">Hybrid only</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="search-loading" class="loading" hidden>
+      <div class="spinner"></div>
+      <p>Searching for internship opportunities...</p>
+    </div>
+    <div id="results-container" hidden>
+      <h3 id="results-count"></h3>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Position</th>
+            <th>Location</th>
+            <th>Format</th>
+            <th>Pay Range</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="results-body"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Resume Manager Screen -->
+  <main id="resume-manager" class="screen">
+    <div class="resume-header">
+      <h2>Resume Manager</h2>
+      <button id="upload-btn" class="btn btn-primary">Upload New Resume</button>
+      <input type="file" id="file-input" accept=".pdf" hidden>
+    </div>
+    <div id="no-resumes" class="empty-state">
+      <p>No resumes uploaded yet. Upload your first resume to get started.</p>
+    </div>
+    <table class="resume-table" id="resume-table" hidden>
+      <thead>
+        <tr>
+          <th>File Name</th>
+          <th>Upload Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="resume-body"></tbody>
+    </table>
+    <div id="pdf-extraction-warning" class="warning-banner" hidden>
+      Install pdfplumber for AI-powered resume text extraction: <code>pip3 install pdfplumber</code>
+    </div>
+  </main>
+
+  <!-- Settings Screen -->
+  <main id="settings" class="screen">
+    <div class="settings-container">
+      <h2>Settings</h2>
+      <div class="settings-card">
+        <h3>JSearch API Key</h3>
+        <p class="settings-desc">Connect to RapidAPI's JSearch to search real job listings from LinkedIn, Indeed, Glassdoor, and more. Get a free key at <a href="https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch" target="_blank">rapidapi.com/jsearch</a> (500 free requests/month).</p>
+        <div class="settings-key-row">
+          <input type="password" id="api-key-input" placeholder="Enter your RapidAPI key" autocomplete="off">
+          <button id="save-key-btn" class="btn btn-primary">Save Key</button>
+        </div>
+        <div id="key-status" class="key-status"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interest Modal -->
+  <div id="modal-overlay" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h3 id="modal-title"></h3>
+          <p id="modal-subtitle" class="subtitle"></p>
+        </div>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-tabs">
+        <button class="tab-btn active" data-tab="cover-letter">Cover Letter</button>
+        <button class="tab-btn" data-tab="resume-tips">Resume Tips</button>
+      </div>
+      <div class="modal-body">
+        <div id="tab-cover-letter" class="tab-content active">
+          <div class="tab-loading" hidden>
+            <div class="spinner"></div>
+            <p>Generating tailored cover letter...</p>
+          </div>
+          <div class="tab-result"></div>
+        </div>
+        <div id="tab-resume-tips" class="tab-content">
+          <div class="tab-loading" hidden>
+            <div class="spinner"></div>
+            <p>Analyzing resume fit...</p>
+          </div>
+          <div class="tab-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF Viewer Modal -->
+  <div id="pdf-overlay" class="modal-overlay">
+    <div class="modal pdf-viewer-modal">
+      <div class="modal-header">
+        <h3 id="pdf-viewer-title">Resume Preview</h3>
+        <button class="modal-close" id="pdf-close">&times;</button>
+      </div>
+      <div class="pdf-viewer-body" id="pdf-viewer-body">
+        <div class="pdf-loading" id="pdf-loading">
+          <div class="spinner"></div>
+          <p>Loading PDF...</p>
+        </div>
+        <div id="pdf-pages"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
