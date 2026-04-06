@@ -213,13 +213,23 @@ body::before {
 .filter-group input {
   font-family: var(--font-body);
   font-size: 0.85rem;
-  padding: 8px 12px;
+  padding: 9px 32px 9px 12px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 0;
   background: var(--bg-elevated);
   color: var(--text);
   transition: all var(--transition);
   outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.filter-group select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23ffe500' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
 }
 
 .filter-group select:focus,
@@ -611,11 +621,13 @@ body::before {
   font-size: 0.85rem;
   padding: 10px 14px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 0;
   background: var(--bg-elevated);
   color: var(--text);
   outline: none;
   transition: all var(--transition);
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .settings-key-row input:focus {
