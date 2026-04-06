@@ -290,8 +290,6 @@ const fileInput = document.getElementById('file-input');
 const resumeTable = document.getElementById('resume-table');
 const resumeBody = document.getElementById('resume-body');
 const noResumes = document.getElementById('no-resumes');
-const pdfWarning = document.getElementById('pdf-extraction-warning');
-
 uploadBtn.addEventListener('click', () => fileInput.click());
 
 fileInput.addEventListener('change', async () => {
@@ -306,8 +304,7 @@ fileInput.addEventListener('change', async () => {
 
   try {
     const res = await fetch('/api/resumes/upload', { method: 'POST', body: formData });
-    const data = await res.json();
-    if (data.warning) pdfWarning.hidden = false;
+    await res.json();
     loadResumes();
   } catch (err) {
     console.error('Upload failed:', err);
