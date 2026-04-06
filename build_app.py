@@ -15,6 +15,7 @@ cmd = [
     "--windowed",           # .app bundle, no terminal window
     "--onedir",             # faster startup than --onefile
     "--noconfirm",          # overwrite previous build
+    "--icon", "icon.icns",
     "--add-data", "static:static",
     "--hidden-import", "webview",
     "--hidden-import", "pdfplumber",

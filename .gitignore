@@ -17,3 +17,7 @@ __pycache__/
 build/
 dist/
 *.spec
+
+# Icon intermediate files
+icon.iconset/
+icon_1024.png
