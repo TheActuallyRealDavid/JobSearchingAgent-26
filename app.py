@@ -354,6 +354,106 @@ SAMPLE_JOBS = [
         "description": "Develop software for defense and aerospace systems. Strong C/C++ and systems programming skills valued. Must be eligible for security clearance (US citizenship required).",
         "apply_link": "https://www.lockheedmartinjobs.com/college-students"
     },
+    {
+        "company": "Google",
+        "position": "Software Engineering Intern, Fall 2026",
+        "location": "Mountain View, CA",
+        "format": "Hybrid",
+        "pay_range": "$50-58/hr",
+        "is_reach": True,
+        "description": "Work on core products like Search, Maps, Chrome, or Cloud. Strong CS fundamentals, algorithms, and data structures required. Experience with C++, Java, Python, or Go preferred.",
+        "apply_link": "https://www.google.com/about/careers/applications/students/"
+    },
+    {
+        "company": "IBM",
+        "position": "Software Developer Intern",
+        "location": "Research Triangle Park, NC",
+        "format": "Hybrid",
+        "pay_range": "$30-42/hr",
+        "is_reach": False,
+        "description": "Join a team building cloud and AI solutions. Work with Java, Python, Node.js, and Kubernetes. Collaborate with experienced engineers on enterprise software.",
+        "apply_link": "https://www.ibm.com/careers/search?field_of_work=Internship"
+    },
+    {
+        "company": "Cisco",
+        "position": "Software Engineer Intern (Fall 2026)",
+        "location": "San Jose, CA",
+        "format": "Hybrid",
+        "pay_range": "$30-45/hr",
+        "is_reach": False,
+        "description": "Develop networking and security software. Experience with Python, C/C++, or Go. Work on products used by enterprises worldwide.",
+        "apply_link": "https://jobs.cisco.com/jobs/SearchJobs/intern"
+    },
+    {
+        "company": "Intel",
+        "position": "Software Engineering Intern",
+        "location": "Hillsboro, OR",
+        "format": "On-site",
+        "pay_range": "$28-42/hr",
+        "is_reach": False,
+        "description": "Contribute to software for next-gen processors and platforms. Strong C/C++ skills required. Interest in systems programming, compilers, or performance optimization.",
+        "apply_link": "https://jobs.intel.com/en/search-jobs?k=intern"
+    },
+    {
+        "company": "Salesforce",
+        "position": "Software Engineer Intern",
+        "location": "San Francisco, CA",
+        "format": "Hybrid",
+        "pay_range": "$45-55/hr",
+        "is_reach": False,
+        "description": "Build cloud-based CRM applications at scale. Full-stack development with Java, JavaScript/React, and relational databases. Agile team environment.",
+        "apply_link": "https://careers.salesforce.com/en/jobs/?team=Intern"
+    },
+    {
+        "company": "Oracle",
+        "position": "Software Engineer Intern",
+        "location": "Austin, TX",
+        "format": "On-site",
+        "pay_range": "$35-48/hr",
+        "is_reach": False,
+        "description": "Work on Oracle Cloud Infrastructure or database products. Java, Python, or C++ experience required. Build high-performance distributed systems.",
+        "apply_link": "https://www.oracle.com/careers/students-grads/"
+    },
+    {
+        "company": "Raytheon",
+        "position": "Software Engineering Intern (Fall 2026)",
+        "location": "Tewksbury, MA",
+        "format": "On-site",
+        "pay_range": "$25-38/hr",
+        "is_reach": False,
+        "description": "Develop software for defense systems including radar, missiles, and cybersecurity. C/C++, Java, or Python. US citizenship required for security clearance.",
+        "apply_link": "https://careers.rtx.com/global/en/raytheon-early-careers"
+    },
+    {
+        "company": "Tesla",
+        "position": "Software Engineering Intern, Vehicle Software",
+        "location": "Palo Alto, CA",
+        "format": "On-site",
+        "pay_range": "$35-50/hr",
+        "is_reach": False,
+        "description": "Develop embedded and application software for Tesla vehicles. C/C++, Python experience. Work on autopilot, infotainment, or factory systems.",
+        "apply_link": "https://www.tesla.com/careers/internships"
+    },
+    {
+        "company": "Palantir",
+        "position": "Software Engineer Intern",
+        "location": "New York, NY",
+        "format": "On-site",
+        "pay_range": "$50-60/hr",
+        "is_reach": True,
+        "description": "Build software that empowers organizations to use data effectively. Strong algorithms and systems design skills. Java, C++, or TypeScript experience.",
+        "apply_link": "https://www.palantir.com/careers/students/"
+    },
+    {
+        "company": "General Motors",
+        "position": "Software Developer Intern",
+        "location": "Warren, MI",
+        "format": "Hybrid",
+        "pay_range": "$28-40/hr",
+        "is_reach": False,
+        "description": "Work on next-gen vehicle software and connected services. Python, Java, or C++ experience. Contribute to EV and autonomous vehicle platforms.",
+        "apply_link": "https://search-careers.gm.com/en/jobs/?search=intern+software"
+    },
 ]
 
 # ── Reach ratio enforcement ──
@@ -750,14 +850,15 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/jobs/search":
             payload = json.loads(body) if body else {}
             query = payload.get("query", "software engineer intern fall 2026")
+            count = min(int(payload.get("count", 10)), 20)
 
             # Try live search first
-            live_jobs = search_jobs_jsearch(query)
+            live_jobs = search_jobs_jsearch(query, num_results=count)
             if live_jobs is not None:
                 jobs = ensure_reach_ratio(live_jobs)
                 self.json_response({"jobs": jobs, "source": "live"})
             else:
-                self.json_response({"jobs": SAMPLE_JOBS, "source": "sample"})
+                self.json_response({"jobs": SAMPLE_JOBS[:count], "source": "sample"})
             return
 
         # Generate cover letter

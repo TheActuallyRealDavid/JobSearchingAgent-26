@@ -12,3 +12,8 @@ blocked_jobs.json
 # Python
 __pycache__/
 *.pyc
+
+# PyInstaller build artifacts
+build/
+dist/
+*.spec

@@ -96,10 +96,11 @@ searchBtn.addEventListener('click', async () => {
 
   try {
     await loadBlockedJobs();
+    const filters = getFilters();
     const res = await fetch('/api/jobs/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({})
+      body: JSON.stringify({ count: filters.maxResults })
     });
     const data = await res.json();
     allJobs = (data.jobs || []).map((j, i) => ({ ...j, _origIdx: i }));
