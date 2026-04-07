@@ -103,7 +103,7 @@ def search_jobs_jsearch(query="software engineer intern fall 2026", num_results=
         return None  # Signal to use sample data
 
     # JSearch returns ~10 jobs per page; fetch enough pages for num_results
-    pages_needed = max(1, min(5, (num_results + 9) // 10))
+    pages_needed = max(1, min(10, (num_results + 9) // 10))
     params = urllib.parse.urlencode({
         "query": query,
         "page": "1",
@@ -926,7 +926,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/jobs/search":
             payload = json.loads(body) if body else {}
             query = payload.get("query", "software engineer intern fall 2026")
-            count = min(int(payload.get("count", 10)), 50)
+            count = max(1, min(int(payload.get("count", 10)), 100))
 
             # Try live search first
             live_jobs = search_jobs_jsearch(query, num_results=count)
