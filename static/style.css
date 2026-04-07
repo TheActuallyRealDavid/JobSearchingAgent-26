@@ -178,6 +178,8 @@ body::before {
 }
 
 /* ── Filters ── */
+[hidden] { display: none !important; }
+
 .filters-panel {
   display: flex;
   gap: 16px;
