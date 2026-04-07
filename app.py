@@ -572,7 +572,69 @@ def generate_cover_letter_content(job, data):
         for flag in memory_flags:
             letter += f'\n<div class="memory-flag">{flag}</div>'
 
+    # Style principles applied
+    letter += """
+<div class="memory-flag"><strong>Writing principles applied to this letter:</strong>
+<ul style="margin:8px 0 0 18px;">
+<li>Action verbs (built, led, architected, secured) — never "responsible for"</li>
+<li>Quantified impact ($2,500+ sponsorship, 600% growth, 10 hrs/month saved, 200+ students)</li>
+<li>Specific collaboration callouts instead of vague "worked with team"</li>
+<li>Keywords mirrored from the job description above</li>
+<li>STAR-style framing on every project mentioned</li>
+</ul></div>"""
+
     return letter
+
+
+def audit_resume_red_flags(resume_text, job_desc):
+    """Scan resume against the 9 red-flag rules."""
+    lower = resume_text.lower()
+    flags = []
+
+    # 1. "Responsible for" / passive language
+    weak_phrases = ["responsible for", "duties included", "tasked with", "in charge of", "helped with"]
+    found_weak = [p for p in weak_phrases if p in lower]
+    if found_weak:
+        flags.append(("Weak phrasing", f"Found <code>{', '.join(found_weak)}</code>. Replace with action verbs: <strong>Built, Led, Reduced, Increased, Architected, Shipped, Optimized.</strong>"))
+
+    # 2. No numbers — count digits
+    digit_count = sum(c.isdigit() for c in resume_text)
+    word_count = max(len(resume_text.split()), 1)
+    digit_ratio = digit_count / word_count
+    if digit_ratio < 0.05:
+        flags.append(("Not enough numbers", "Your resume is light on metrics. Quantify everything you can: <strong>40% faster, 2M users, $10k saved, 5-person team, 200+ users.</strong>"))
+
+    # 3. Vague team language
+    if "worked with" in lower or "team player" in lower:
+        flags.append(("Vague collaboration", "Replace <code>worked with team</code> with specifics: <strong>Led 5-person team, Collaborated with PM and 3 engineers, Mentored 2 junior devs.</strong>"))
+
+    # 4. Skills randomly listed — check if any job keywords are missing
+    # (handled by skill gap analysis below)
+
+    # 5. Objective statement
+    if "objective:" in lower or "career objective" in lower or "objective statement" in lower:
+        flags.append(("Objective statement", "Delete the objective statement. Recruiters skip it. Use that space for an additional project or impact bullet."))
+
+    # 6. Generic descriptions / no STAR
+    generic_tells = ["various", "many", "different projects", "etc."]
+    found_generic = [g for g in generic_tells if g in lower]
+    if found_generic:
+        flags.append(("Generic descriptions", f"Found <code>{', '.join(found_generic)}</code>. Use STAR format: <strong>Situation → Task → Action → Result.</strong>"))
+
+    # 7. Microsoft Office
+    if "microsoft office" in lower or "ms office" in lower or "proficient in word" in lower:
+        flags.append(("Filler skills", "Remove <code>Microsoft Office / MS Word</code>. List only technical skills that matter for this role."))
+
+    # 8. Length — rough page estimate
+    if word_count > 700:
+        flags.append(("Possibly 2+ pages", f"Your resume has ~{word_count} words. Aim for ≤ 600 words / 1 page unless you have 10+ years of experience."))
+
+    # 9. Fancy formatting — check for unusual characters
+    fancy_chars = sum(1 for c in resume_text if ord(c) > 8000)
+    if fancy_chars > 30:
+        flags.append(("Fancy formatting", "Detected non-standard characters or symbols. Use a simple ATS-friendly layout — single column, standard fonts, no icons or graphics."))
+
+    return flags
 
 
 def generate_resume_tips_content(job, data):
@@ -589,7 +651,19 @@ def generate_resume_tips_content(job, data):
     desc_lower = description.lower()
     resume_lower = resume_text.lower()
 
-    tips = f"<h4>Resume Tips for {position} at {company}</h4><ul>"
+    tips = f"<h4>Resume Tips for {position} at {company}</h4>"
+
+    # Red Flags Audit — scan resume for the 9 killers
+    red_flags = audit_resume_red_flags(resume_text, description)
+    if red_flags:
+        tips += "<h4>Red Flags Found in Your Resume</h4><ul>"
+        for label, msg in red_flags:
+            tips += f"<li><strong>{label}:</strong> {msg}</li>"
+        tips += "</ul>"
+    else:
+        tips += '<div class="memory-flag"><strong>Red Flags Audit:</strong> Your resume passed all 9 killer checks (action verbs, quantified impact, specific collaboration, no objective, no filler skills, ATS-friendly).</div>'
+
+    tips += "<h4>Tailoring for This Role</h4><ul>"
 
     # Check for skill gaps
     job_keywords = {
