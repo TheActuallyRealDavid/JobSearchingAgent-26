@@ -140,7 +140,9 @@ function renderJobTable(jobs, source) {
   jobs.forEach((job, idx) => {
     const tr = document.createElement('tr');
 
-    const formatClass = job.format === 'Hybrid' ? 'format-hybrid' : 'format-onsite';
+    const formatClass = job.format === 'Hybrid' ? 'format-hybrid'
+                       : job.format === 'Remote' ? 'format-remote'
+                       : 'format-onsite';
     const reachBadge = job.is_reach ? '<span class="badge-reach">Reach</span>' : '';
     const payCell = job.pay_range
       ? job.pay_range
